@@ -56,6 +56,8 @@ Provide your evaluation as a JSON object with scores for each model. Use the mod
     "instruction_following": 0 or 1,
     "reason_of_instruction_following": "1–2 sentence explanation with examples or rationale."
   }
+  ,
+  ...
 }
 
 Evaluation Guidelines

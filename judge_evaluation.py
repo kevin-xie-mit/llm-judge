@@ -10,6 +10,7 @@ for efficient evaluation.
 
 Key Features:
 - Filters to only 4 representative models
+- Only processes files with '-cot-' in the filename
 - Combines multiple model responses into single evaluation requests
 - Randomizes model response order per test case to avoid positional bias
 - Anonymizes model names to prevent judge bias
@@ -29,7 +30,7 @@ from prompt import prompt
 def collect_all_predictions(validation_dir: str) -> Dict[str, Dict[str, List[Dict]]]:
     """
     Collect all model predictions from result files in the validation directory.
-    Only includes the 4 representative models for evaluation.
+    Only includes the 4 representative models and files with '-cot-' in the filename.
     
     Args:
         validation_dir: Path to the validation directory containing task folders
@@ -49,9 +50,12 @@ def collect_all_predictions(validation_dir: str) -> Dict[str, Dict[str, List[Dic
     
     # Find all result.json files
     pattern = os.path.join(validation_dir, "*", "*", "*.result.json")
-    result_files = glob.glob(pattern)
+    all_result_files = glob.glob(pattern)
     
-    print(f"Found {len(result_files)} result files")
+    # Filter to only include files with "-cot-" in the filename
+    result_files = [f for f in all_result_files if "-cot-" in os.path.basename(f)]
+    
+    print(f"Found {len(all_result_files)} total result files, {len(result_files)} with '-cot-' in filename")
     
     for file_path in result_files:
         try:
@@ -217,7 +221,7 @@ def create_judge_user_content(request_data: Dict[str, Any]) -> str:
 
 def prepare_azure_batch_data_judge(
     judge_requests: List[Dict[str, Any]],
-    model_name: str = "gpt-4o",
+    model_name: str = "o3-batch",
     prompt_mode: str = "judge",
     split: str = "test",
     temperature: float = 0.0,
@@ -411,7 +415,8 @@ if __name__ == "__main__":
     #
     # Changes made:
     # 1. Only processes the 4 representative models above
-    # 2. Creates one evaluation request per test case with all model responses
-    # 3. Randomizes model response order per test case to avoid positional bias
-    # 4. Updates prompt format to handle multiple model evaluations
-    # 5. Anonymizes model names to prevent judge bias
+    # 2. Only processes files with '-cot-' in the filename
+    # 3. Creates one evaluation request per test case with all model responses
+    # 4. Randomizes model response order per test case to avoid positional bias
+    # 5. Updates prompt format to handle multiple model evaluations
+    # 6. Anonymizes model names to prevent judge bias
